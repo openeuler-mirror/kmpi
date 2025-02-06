@@ -4,6 +4,7 @@
  *                         of Tennessee Research Foundation.  All rights
  *                         reserved.
  * Copyright (c) 2022      IBM Corporation.  All rights reserved.
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd. All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -146,6 +147,8 @@ void mca_pml_ucx_persistent_request_complete(mca_pml_ucx_persistent_request_t *p
 void mca_pml_ucx_completed_request_init(ompi_request_t *ompi_req);
 
 void mca_pml_ucx_request_init(void *request);
+
+void mca_pml_ucx_request_timeout_warn(uint64_t tag);
 
 void mca_pml_ucx_request_cleanup(void *request);
 
