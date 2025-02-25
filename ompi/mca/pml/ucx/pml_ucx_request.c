@@ -4,6 +4,7 @@
  *                         of Tennessee Research Foundation.  All rights
  *                         reserved.
  * Copyright (c) 2022      IBM Corporation.  All rights reserved.
+ * Copyright (c) 2025 Huawei Technologies Co., Ltd. All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -211,6 +212,21 @@ void mca_pml_ucx_request_init(void *request)
     mca_pml_ucx_request_init_common(ompi_req, false, OMPI_REQUEST_ACTIVE,
                                     mca_pml_ucx_request_free,
                                     mca_pml_ucx_request_cancel);
+}
+
+void mca_pml_ucx_request_timeout_warn(uint64_t tag)
+{
+    int rc;
+    char *peer_hostname = NULL;
+    int32_t rank = PML_UCX_TAG_GET_SOURCE(tag);
+    opal_process_name_t proc_name = {.vpid = rank, .jobid = OMPI_PROC_MY_NAME->jobid};
+    OPAL_MODEX_RECV_VALUE_OPTIONAL(rc, PMIX_HOSTNAME, &proc_name,
+                                   (char**)&(peer_hostname), PMIX_STRING);
+    if (rc != OPAL_SUCCESS) {
+        peer_hostname = "unknown";
+    }
+    PML_UCX_WARN("UCP request timeout! request tag 0x%lX local proc: %u peer proc: %d peer hostname: %s\n",
+                  tag, OMPI_PROC_MY_NAME->vpid, rank, peer_hostname);
 }
 
 void mca_pml_ucx_request_cleanup(void *request)

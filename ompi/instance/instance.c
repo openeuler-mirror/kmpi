@@ -114,8 +114,7 @@ OBJ_CLASS_INSTANCE(ompi_instance_t, opal_infosubscriber_t, ompi_instance_constru
 static mca_base_framework_t *ompi_framework_dependencies[] = {
     &ompi_hook_base_framework, &ompi_op_base_framework,
     &opal_allocator_base_framework, &opal_rcache_base_framework, &opal_mpool_base_framework, &opal_smsc_base_framework,
-    &ompi_bml_base_framework, &ompi_pml_base_framework, &ompi_coll_base_framework,
-    &ompi_osc_base_framework, NULL,
+    &ompi_bml_base_framework, &ompi_pml_base_framework, NULL,
 };
 
 static mca_base_framework_t *ompi_lazy_frameworks[] = {
@@ -518,6 +517,25 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
     if (OMPI_SUCCESS != (ret = mca_pml_base_select (OPAL_ENABLE_PROGRESS_THREADS, ompi_mpi_thread_multiple))) {
         return ompi_instance_print_error ("mca_pml_base_select() failed", ret);
     }
+
+    ret = mca_base_framework_open (&ompi_coll_base_framework, 0);
+    if (OPAL_UNLIKELY(OPAL_SUCCESS != ret)) {
+        char error_msg[256];
+        snprintf (error_msg, sizeof(error_msg), "mca_base_framework_open on %s_%s failed",
+                    (&ompi_coll_base_framework)->framework_project,
+                    (&ompi_coll_base_framework)->framework_name);
+        return ompi_instance_print_error (error_msg, ret);
+    }
+
+    ret = mca_base_framework_open (&ompi_osc_base_framework, 0);
+    if (OPAL_UNLIKELY(OPAL_SUCCESS != ret)) {
+        char error_msg[256];
+        snprintf (error_msg, sizeof(error_msg), "mca_base_framework_open on %s_%s failed",
+                    (&ompi_osc_base_framework)->framework_project,
+                    (&ompi_osc_base_framework)->framework_name);
+        return ompi_instance_print_error (error_msg, ret);
+    }
+
 
     OMPI_TIMING_IMPORT_OPAL("orte_init");
     OMPI_TIMING_NEXT("rte_init-commit");
