@@ -114,7 +114,7 @@ OBJ_CLASS_INSTANCE(ompi_instance_t, opal_infosubscriber_t, ompi_instance_constru
 static mca_base_framework_t *ompi_framework_dependencies[] = {
     &ompi_hook_base_framework, &ompi_op_base_framework,
     &opal_allocator_base_framework, &opal_rcache_base_framework, &opal_mpool_base_framework, &opal_smsc_base_framework,
-    &ompi_bml_base_framework, &ompi_pml_base_framework, NULL,
+    &ompi_bml_base_framework, &ompi_pml_base_framework, &ompi_coll_base_framework, &ompi_osc_base_framework, NULL,
 };
 
 static mca_base_framework_t *ompi_lazy_frameworks[] = {
@@ -403,6 +403,10 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
 
     /* open the ompi hook framework */
     for (int i = 0 ; ompi_framework_dependencies[i] ; ++i) {
+        if (ompi_framework_dependencies[i] == &ompi_coll_base_framework ||
+            ompi_framework_dependencies[i] == &ompi_osc_base_framework) {
+            continue;
+        }
         ret = mca_base_framework_open (ompi_framework_dependencies[i], 0);
         if (OPAL_UNLIKELY(OPAL_SUCCESS != ret)) {
             char error_msg[256];
