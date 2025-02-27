@@ -1,3 +1,5 @@
+Copyright (c) 2025      Huawei Technologies Co., Ltd. All rights
+                        reserved.
 # Open MPI
 
 [The Open MPI Project](https://www.open-mpi.org/) is an open source

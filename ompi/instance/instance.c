@@ -470,13 +470,6 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
         return ompi_instance_print_error ("ompi_info_init_env() failed", ret);
     }
 
-    /* declare our presence for interlib coordination, and
-     * register for callbacks when other libs declare. XXXXXX -- TODO -- figure out how
-     * to specify the thread level when different instances may request different levels. */
-    if (OMPI_SUCCESS != (ret = ompi_interlib_declare(MPI_THREAD_MULTIPLE, OMPI_IDENT_STRING))) {
-        return ompi_instance_print_error ("ompi_interlib_declare", ret);
-    }
-
     /* initialize datatypes. This step should be done early as it will
      * create the local convertor and local arch used in the proc
      * init.
@@ -536,6 +529,12 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
         return ompi_instance_print_error (error_msg, ret);
     }
 
+    /* declare our presence for interlib coordination, and
+     * register for callbacks when other libs declare. XXXXXX -- TODO -- figure out how
+     * to specify the thread level when different instances may request different levels. */
+    if (OMPI_SUCCESS != (ret = ompi_interlib_declare(MPI_THREAD_MULTIPLE, OMPI_IDENT_STRING))) {
+        return ompi_instance_print_error ("ompi_interlib_declare", ret);
+    }
 
     OMPI_TIMING_IMPORT_OPAL("orte_init");
     OMPI_TIMING_NEXT("rte_init-commit");
