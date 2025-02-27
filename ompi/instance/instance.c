@@ -114,7 +114,7 @@ OBJ_CLASS_INSTANCE(ompi_instance_t, opal_infosubscriber_t, ompi_instance_constru
 static mca_base_framework_t *ompi_framework_dependencies[] = {
     &ompi_hook_base_framework, &ompi_op_base_framework,
     &opal_allocator_base_framework, &opal_rcache_base_framework, &opal_mpool_base_framework, &opal_smsc_base_framework,
-    &ompi_bml_base_framework, &ompi_pml_base_framework, NULL,
+    &ompi_bml_base_framework, &ompi_pml_base_framework, &ompi_coll_base_framework, &ompi_osc_base_framework, NULL,
 };
 
 static mca_base_framework_t *ompi_lazy_frameworks[] = {
@@ -403,6 +403,10 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
 
     /* open the ompi hook framework */
     for (int i = 0 ; ompi_framework_dependencies[i] ; ++i) {
+        if (ompi_framework_dependencies[i] == &ompi_coll_base_framework ||
+            ompi_framework_dependencies[i] == &ompi_osc_base_framework) {
+            continue;
+        }
         ret = mca_base_framework_open (ompi_framework_dependencies[i], 0);
         if (OPAL_UNLIKELY(OPAL_SUCCESS != ret)) {
             char error_msg[256];
@@ -470,13 +474,6 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
         return ompi_instance_print_error ("ompi_info_init_env() failed", ret);
     }
 
-    /* declare our presence for interlib coordination, and
-     * register for callbacks when other libs declare. XXXXXX -- TODO -- figure out how
-     * to specify the thread level when different instances may request different levels. */
-    if (OMPI_SUCCESS != (ret = ompi_interlib_declare(MPI_THREAD_MULTIPLE, OMPI_IDENT_STRING))) {
-        return ompi_instance_print_error ("ompi_interlib_declare", ret);
-    }
-
     /* initialize datatypes. This step should be done early as it will
      * create the local convertor and local arch used in the proc
      * init.
@@ -536,6 +533,12 @@ static int ompi_mpi_instance_init_common (int argc, char **argv)
         return ompi_instance_print_error (error_msg, ret);
     }
 
+    /* declare our presence for interlib coordination, and
+     * register for callbacks when other libs declare. XXXXXX -- TODO -- figure out how
+     * to specify the thread level when different instances may request different levels. */
+    if (OMPI_SUCCESS != (ret = ompi_interlib_declare(MPI_THREAD_MULTIPLE, OMPI_IDENT_STRING))) {
+        return ompi_instance_print_error ("ompi_interlib_declare", ret);
+    }
 
     OMPI_TIMING_IMPORT_OPAL("orte_init");
     OMPI_TIMING_NEXT("rte_init-commit");
